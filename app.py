@@ -1,19 +1,45 @@
 import argparse
 
+from service import DataManager
 
-def get_all_records():
-    print("Держи результат")
+
+def func_hello():
+    return "Hello-world"
 
 
 def run():
-    parser = argparse.ArgumentParser(description='Process some integers.')
+    global_parser = argparse.ArgumentParser(
+        prog="phone_book")
 
-    parser.add_argument('-l', '--list', dest='accumulate', action='store_const',
-                        const=get_all_records,
-                        help='sum the integers (default: find the max)')
+    subparsers = global_parser.add_subparsers(
+        title="subcommands", help="Телефонный справочник")
 
-    args = parser.parse_args()
-    print(args.accumulate(args.integers))
+    # select
+    select_parser = subparsers.add_parser(
+        "select_records", help="Вывод всех записей")
+    select_parser.add_argument(nargs="*", dest="values", default=[])
+    select_parser.set_defaults(func=DataManager.select_all_records)
+
+    # insert
+    insert_parser = subparsers.add_parser(
+        "insert_record",
+        help="Добавить новую запись: Фамилия, Имя, Отчество, Компания, Рабочий тлф, Личный тлф")
+    insert_parser.add_argument(nargs=6, dest="values")
+    insert_parser.set_defaults(func=DataManager().insert_record)
+
+    # update
+    update_parser = subparsers.add_parser(
+        "update_record",
+        help="Изменить запись: id, Фамилия, Имя, Отчество, Компания, Рабочий тлф, Личный тлф")
+    update_parser.add_argument(
+        "--id", type=int, action="append", dest="values")
+    update_parser.add_argument("--first_name", action="append", dest="values")
+    update_parser.add_argument("--last_name", action="append", dest="values")
+    update_parser.set_defaults(func=DataManager().update_record)
+
+    args = global_parser.parse_args()
+    print(args)
+    args.func(*args.values)
 
 
 if __name__ == "__main__":
