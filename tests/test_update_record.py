@@ -18,14 +18,16 @@ class DataManagerTest(TestCase):
                                          )
         self.assertTrue(result)
 
-        expected_data = {'last_name': 'Test',
-                         'first_name': 'Test',
-                         'middle_name': 'Иванович',
-                         'company': 'Test',
-                         'phone_1': 'Test',
-                         'phone_2': '+79229928837'}
+        expected_data = {
+            "last_name": "Test",
+            "first_name": "Test",
+            "middle_name": "Иванович",
+            "company": "Test",
+            "phone_1": "Test",
+            "phone_2": "+79129998877"
+        }
 
         with open("data.json", "r") as fp:
             data = json.load(fp)
 
-        self.assertEqual(expected_data, data[1])
+        self.assertEqual(expected_data, data[0])

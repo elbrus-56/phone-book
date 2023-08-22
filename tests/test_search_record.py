@@ -61,3 +61,43 @@ class DataManagerTest(TestCase):
 
         )
         self.assertEqual([], result)
+
+    def test_search_record_with_different_register(self):
+        result = self.data.search_record(
+            first_name="Иван"
+        )
+        expexted_data = [{
+            "last_name": "Иванов",
+            "first_name": "Иван",
+            "middle_name": "Иванович",
+            "company": "ООО Компания 1",
+            "phone_1": "+73519998877",
+            "phone_2": "+79129998877"
+        }]
+        self.assertEqual(expexted_data, result)
+
+        result = self.data.search_record(
+            first_name="иван"
+        )
+        expexted_data = [{
+            "last_name": "Иванов",
+            "first_name": "Иван",
+            "middle_name": "Иванович",
+            "company": "ООО Компания 1",
+            "phone_1": "+73519998877",
+            "phone_2": "+79129998877"
+        }]
+        self.assertEqual(expexted_data, result)
+
+        result = self.data.search_record(
+            first_name="ИВАН"
+        )
+        expexted_data = [{
+            "last_name": "Иванов",
+            "first_name": "Иван",
+            "middle_name": "Иванович",
+            "company": "ООО Компания 1",
+            "phone_1": "+73519998877",
+            "phone_2": "+79129998877"
+        }]
+        self.assertEqual(expexted_data, result)

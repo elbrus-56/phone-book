@@ -8,6 +8,7 @@ class DataManager:
         """
         Функция выводит записи в виде таблицы
         """
+
         # {Индекс|Длина строки}
         template = "{0:5}|{1:10}|{2:10}|{3:15}|{4:23}|{5:17}|{6:15}"
         print(template.format("id", "Фамилия", "Имя",
@@ -24,29 +25,14 @@ class DataManager:
             return []
 
     @staticmethod
-    def _read_data_json() -> list:
+    def _read_data_json() -> Optional[list]:
         """
         Функция считывает данные из json файла
-
-        """
-        with open("data.json", "r") as file:
-            return json.load(file)
-
-    def _write_data_json(self, data: list) -> None:
-        """
-        Функция записывает данные в json файл
         """
 
-        with open("data.json", "w") as fp:
-            json.dump(data, fp, ensure_ascii=False, indent=4)
-
-    @classmethod
-    def select_all_records(cls) -> Optional[list]:
-        """
-        Функция выводит список всех записей из файла
-        """
         try:
-            data = cls._read_data_json()
+            with open("data.json", "r") as file:
+                return json.load(file)
         except (FileNotFoundError, FileExistsError) as e:
             print(f"Произошла ошибка чтения файла - {e}")
             return None
@@ -54,8 +40,31 @@ class DataManager:
             print(
                 "Файл 'data.json' не должен быть пустым. JSON поддерживает: 'None, {}, []'")
             return None
-        else:
+
+    def _write_data_json(self, data: list) -> bool:
+        """
+        Функция записывает данные в json файл
+        """
+
+        try:
+            with open("data.json", "w") as fp:
+                json.dump(data, fp, ensure_ascii=False, indent=4)
+            return True
+        except (FileNotFoundError, FileExistsError) as e:
+            print(f"Произошла ошибка записи в файл - {e}")
+            return False
+
+    @classmethod
+    def select_all_records(cls) -> Optional[list]:
+        """
+        Функция выводит список всех записей из файла
+        """
+
+        data = cls._read_data_json()
+
+        if data:
             return cls._output_records_as_a_table(data)
+        return None
 
     def insert_record(self,
                       first_name: str,
@@ -94,30 +103,22 @@ class DataManager:
                   "phone_1": phone_1,
                   "phone_2": phone_2
                   }
-        try:
-            data = self._read_data_json()
-        except (FileNotFoundError, FileExistsError) as e:
-            print(f"Произошла ошибка чтения файла - {e}")
-            return None
-        except json.JSONDecodeError:
-            print(
-                "Файл 'data.json' не должен быть пустым. JSON поддерживает: 'None, {}, []'")
-            return None
-        else:
+
+        data = self._read_data_json()
+
+        if data:
             if record not in data:
                 data.append(record)
             else:
                 print("Запись уже существует")
                 return False
 
-        try:
-            self._write_data_json(data)
-        except (FileNotFoundError, FileExistsError) as e:
-            print(f"Произошла ошибка записи в файл - {e}")
-            return False
-        else:
-            print("Запись успешно добавлена")
-            return True
+            new_data = self._write_data_json(data)
+
+            if new_data:
+                print("Запись успешно добавлена")
+                return True
+        return None
 
     def update_record(self, record_id: int,
                       last_name: Optional[str] = None,
@@ -131,16 +132,13 @@ class DataManager:
         Функция обновляет выбранную запись
         """
 
-        try:
-            data = self._read_data_json()
-        except (FileNotFoundError, FileExistsError) as e:
-            print(f"Произошла ошибка чтения файла - {e}")
-            return None
-        except json.JSONDecodeError:
-            print(
-                "Файл 'data.json' не должен быть пустым. JSON поддерживает: 'None, {}, []'")
-            return None
-        else:
+        if not isinstance(record_id, int):
+            print("record_id должно быть целым числом")
+            return False
+
+        data = self._read_data_json()
+
+        if data:
 
             if record_id - 1 >= len(data):
                 print("Нет записи с таким номером")
@@ -170,14 +168,12 @@ class DataManager:
                 phone_2=phone_2
             )
 
-        try:
-            self._write_data_json(data)
-        except (FileNotFoundError, FileExistsError) as e:
-            print(f"Произошла ошибка записи в файл - {e}")
-            return False
-        else:
-            print(f"Запись {record} успешно изменена")
-            return True
+            new_data = self._write_data_json(data)
+
+            if new_data:
+                print(f"Запись {record} успешно изменена")
+                return True
+        return None
 
     def search_record(self,
                       last_name: Optional[str] = None,
@@ -190,42 +186,37 @@ class DataManager:
         Функция ищет записи по параметрам
         """
 
-        try:
-            data = self._read_data_json()
-        except (FileNotFoundError, FileExistsError) as e:
-            print(f"Произошла ошибка чтения файла - {e}")
-            return None
-        except json.JSONDecodeError:
-            print(
-                "Файл 'data.json' не должен быть пустым. JSON поддерживает: 'None, {}, []'")
-            return None
+        data = self._read_data_json()
 
-        search_fields = []
+        if data:
 
-        if last_name is not None:
-            search_fields.append(last_name)
-        if first_name is not None:
-            search_fields.append(first_name)
-        if middle_name is not None:
-            search_fields.append(middle_name)
-        if company is not None:
-            search_fields.append(company)
-        if phone_1 is not None:
-            search_fields.append(phone_1)
-        if phone_2 is not None:
-            search_fields.append(phone_2)
+            search_fields = []
 
-        result = []
+            if last_name is not None:
+                search_fields.append(last_name)
+            if first_name is not None:
+                search_fields.append(first_name)
+            if middle_name is not None:
+                search_fields.append(middle_name)
+            if company is not None:
+                search_fields.append(company)
+            if phone_1 is not None:
+                search_fields.append(phone_1)
+            if phone_2 is not None:
+                search_fields.append(phone_2)
 
-        for record in data:
-            check_list = []
-            for field in search_fields:
-                if field in record.values():
-                    check_list.append(True)
-                else:
-                    check_list.append(False)
+            result = []
 
-            if all(check_list):
-                result.append(record)
+            for record in data:
+                check_list = []
+                for field in search_fields:
+                    if field in record.values() or field.title() in record.values():
+                        check_list.append(True)
+                    else:
+                        check_list.append(False)
 
-        return self._output_records_as_a_table(result)
+                if all(check_list):
+                    result.append(record)
+
+            return self._output_records_as_a_table(result)
+        return None
