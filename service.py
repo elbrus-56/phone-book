@@ -3,8 +3,16 @@ from typing import Optional
 
 
 class DataManager:
+
     @staticmethod
-    def _output_records_as_a_table(records: list) -> list:
+    def say_hello() -> None:
+        print("Добро пожаловать в приложение 'Телефонный справочник'. \n"
+              "Для получения справки выполните команду 'python app.py -h'")
+
+    @staticmethod
+    def _output_records_as_a_table(records: list,
+                                   page: int = 1,
+                                   items_per_page: int = 1000) -> list:
         """
         Функция выводит записи в виде таблицы
         """
@@ -16,8 +24,11 @@ class DataManager:
                               "Рабочий телефон", "Личный телефон"))
         print("-" * 100)
 
+        index = items_per_page * page
+
         if records:
-            for id, record in enumerate(records, start=1):
+            for id, record in enumerate(records[index - items_per_page:index],
+                                        start=(index - items_per_page) + 1):
                 print(template.format(id, *record.values()))
             return records
         else:
@@ -38,7 +49,8 @@ class DataManager:
             return None
         except json.JSONDecodeError:
             print(
-                "Файл 'data.json' не должен быть пустым. JSON поддерживает: 'None, {}, []'")
+                "Файл 'data.json' не должен быть пустым. JSON поддерживает: \
+                    'None, {}, []'")
             return None
 
     def _write_data_json(self, data: list) -> bool:
@@ -55,7 +67,8 @@ class DataManager:
             return False
 
     @classmethod
-    def select_all_records(cls) -> Optional[list]:
+    def select_all_records(cls, page: int = 1,
+                           items_per_page: int = 1000) -> Optional[list]:
         """
         Функция выводит список всех записей из файла
         """
@@ -63,7 +76,7 @@ class DataManager:
         data = cls._read_data_json()
 
         if data:
-            return cls._output_records_as_a_table(data)
+            return cls._output_records_as_a_table(data, page, items_per_page)
         return None
 
     def insert_record(self,

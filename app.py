@@ -9,6 +9,8 @@ def run() -> None:
     """
 
     global_parser = argparse.ArgumentParser(prog="phone_book")
+    global_parser.add_argument(nargs="*", dest="values")
+    global_parser.set_defaults(func=DataManager.say_hello)
 
     subparsers = global_parser.add_subparsers(
         title="subcommands", help="Телефонный справочник (Фамилия, Имя, Отчество, \
@@ -17,7 +19,9 @@ def run() -> None:
     # select
     select_parser = subparsers.add_parser(
         "select_records", help="Вывод всех записей")
-    select_parser.add_argument(nargs="*", dest="values", default=[])
+    select_parser.add_argument(
+        "-pi", "--page_and_items_per_page", nargs=2, dest="values", type=int, default=[1, 1000])
+
     select_parser.set_defaults(func=DataManager.select_all_records)
 
     # insert

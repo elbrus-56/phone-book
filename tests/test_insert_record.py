@@ -69,3 +69,19 @@ class DataManagerTest(TestCase):
 
         )
         self.assertFalse(result)
+
+    def test_insert_record_without_fields(self):
+
+        with self.assertRaises(TypeError) as context:
+            result = self.data.insert_record(
+                first_name="Татьяна",
+                last_name="Алексеева",
+                middle_name="Петровна",
+                company="ИП Петрова"
+
+            )
+
+        self.assertEqual(
+            str(TypeError(
+                "insert_record() missing 2 required positional arguments: 'phone_1' and 'phone_2'")),
+            str(context.exception))
